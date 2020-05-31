@@ -4,8 +4,7 @@ import db.DBConnectionProvider;
 import model.User;
 
 import java.sql.*;
-import java.util.LinkedList;
-import java.util.List;
+
 
 public class UserManager {
 
@@ -31,23 +30,23 @@ public class UserManager {
         }
     }
 
-    public User login(String name, String password) throws SQLException {
+    public User login(String name, String password) {
+        try {
+            User user = new User();
+            Statement statement = connection.createStatement();
 
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM `user` WHERE `name` = '" + name + "' AND `password` = '" + password + "'");
 
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT *FROM `user`");
-        while (resultSet.next()) {
-
-            if (name.equals(resultSet.getString("name"))  && password.equals( resultSet.getString("password"))) {
-                User user = new User();
+            while (resultSet.next()) {
                 user.setId(resultSet.getInt("id"));
                 user.setName(resultSet.getString("name"));
                 user.setSurname(resultSet.getString("surname"));
                 user.setPassword(resultSet.getString("password"));
                 user.setPhoneNumber(resultSet.getString("phone_number"));
                 return user;
-
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return null;
     }

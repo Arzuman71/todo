@@ -4,12 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class Todo {
 
     private int id;
@@ -17,9 +17,11 @@ public class Todo {
     private String deadline;
     private Status status;
     private User user;
+    private String name;
 
-    public Todo( String deadline, Status status) {
+    public Todo(String deadline, Status status, String name) {
         this.deadline = deadline;
         this.status = status;
+        this.name = name;
     }
 }

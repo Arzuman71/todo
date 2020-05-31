@@ -9,6 +9,7 @@ public interface Command {
     int ADD_TODO = 6;
     int CHANGE_TODO_STATUS = 7;
     int DELETE_TODO_BY_ID = 8;
+    int DELETE_USER = 10;
 
     static void printCommand1() {
         System.out.println(EXIT + "FOR EXIT");

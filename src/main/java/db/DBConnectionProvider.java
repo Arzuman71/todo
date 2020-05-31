@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DBConnectionProvider {
+public  class DBConnectionProvider {
 
     private static DBConnectionProvider instance = new DBConnectionProvider();
 

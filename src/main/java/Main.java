@@ -9,7 +9,6 @@ import model.User;
 
 
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.Scanner;
 
 public class Main implements Command {
@@ -75,13 +74,16 @@ public class Main implements Command {
 
                     break;
                 case DELETE_TODO_BY_ID:
-                    todoManager.getAlltodo(currentUser.getId());
+                    todoManager.printAlltodo(currentUser.getId());
                     System.out.println("please input todo id");
                     int todoIdForDelet = Integer.parseInt(scanner.nextLine());
                     todoManager.deleteTodoBYid(todoIdForDelet);
                     break;
                 case MY_LIST:
-                    todoManager.getAlltodo(currentUser.getId());
+                    todoManager.printAlltodo(currentUser.getId());
+                    break;
+                case DELETE_USER:
+                    userManager.deleteUserBYid(currentUser.getId());
                     break;
                 default:
                     System.out.println("Wrong command!");
@@ -91,7 +93,7 @@ public class Main implements Command {
 
     @SneakyThrows
     private static void changeTodoStatus() {
-        todoManager.getAlltodo(currentUser.getId());
+        todoManager.printAlltodo(currentUser.getId());
         System.out.println("please input todoId");
         int todoId = Integer.parseInt(scanner.nextLine());
         System.out.println("please input statusNumber");
@@ -103,13 +105,16 @@ public class Main implements Command {
     }
 
     private static void addTodo() {
+        System.out.println("please input todo name");
+        String name = scanner.nextLine();
         System.out.println("please input todo data `TODO, FINISHED, IN_PROGRESS;");
-        Status status = Status.valueOf(scanner.nextLine());
+        Status status = Status.valueOf(scanner.nextLine().toUpperCase());
         System.out.println("please input todo data date `dd.MM.yyyy");
-        String date= scanner.nextLine();
+        String date = scanner.nextLine();
         Todo todo = new Todo();
         todo.setStatus(status);
         todo.setDeadline(date);
+        todo.setName(name);
 
 
         try {
