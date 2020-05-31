@@ -26,5 +26,6 @@ public interface Command {
         System.out.println(CHANGE_TODO_STATUS + "FOR CHANGE_TODO_STATUS");
         System.out.println(DELETE_TODO_BY_ID + "FOR DELETE_TODO_BY_ID");
         System.out.println(MY_LIST + "FOR MY_LIST");
+        System.out.println(DELETE_USER + "FOR DELETE_USER");
     }
 }

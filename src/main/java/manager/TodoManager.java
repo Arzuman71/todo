@@ -1,6 +1,7 @@
 package manager;
 
 import db.DBConnectionProvider;
+import model.Status;
 import model.Todo;
 
 import java.sql.*;
@@ -20,7 +21,7 @@ public class TodoManager {
         preparedStatement.setString(1, String.valueOf(todo.getDeadline()));
         preparedStatement.setString(2, String.valueOf(todo.getStatus()));
         preparedStatement.setInt(3, userId);
-        preparedStatement.setString(4, String.valueOf(todo.getDeadline()));
+        preparedStatement.setString(4, String.valueOf(todo.getName()));
 
         preparedStatement.executeUpdate();
         ResultSet resultSet = preparedStatement.getGeneratedKeys();
@@ -31,7 +32,7 @@ public class TodoManager {
         }
     }
 
-    public void printAlltodo(int userId) throws SQLException {
+    public void printAllTodo(int userId) throws SQLException {
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT * FROM todo WHERE user_id = " + userId);
 
@@ -44,9 +45,10 @@ public class TodoManager {
         }
     }
 
-    public void myInProgressList(int statusNumber, int userId) throws SQLException {
+    public void myInProgressList(Status status, int userId) throws SQLException {
+
         Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT * FROM todo WHERE `status`=" + statusNumber + " AND user_id=" + userId);
+        ResultSet resultSet = statement.executeQuery("SELECT * FROM todo WHERE `status`='" + status + "' AND user_id=" + userId);
         while (resultSet.next()) {
             System.out.println("___________________");
             System.out.println("id " + resultSet.getString("id"));
@@ -59,9 +61,9 @@ public class TodoManager {
     }
 
 
-    public void changeTodoStatus(int todoId, int statusNumber) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement("UPDATE `todo`.`todo` SET `status` = " +
-                statusNumber + " WHERE `id` = " + todoId);
+    public void changeTodoStatus(int todoId, Status status) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement("UPDATE `todo`.`todo` SET `status` = '" +
+                status + "' WHERE `id` = " + todoId);
         //  preparedStatement.setInt(1, todoId);
         preparedStatement.executeUpdate();
 
