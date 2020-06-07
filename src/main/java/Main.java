@@ -1,14 +1,17 @@
 
-import lombok.SneakyThrows;
 import manager.TodoManager;
 import manager.UserManager;
 
-import model.Status;
+import model.ToDoStatus;
 import model.Todo;
 import model.User;
 
 
+import java.sql.Array;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main implements Command {
@@ -16,6 +19,7 @@ public class Main implements Command {
     private static Scanner scanner = new Scanner(System.in);
     private static UserManager userManager = new UserManager();
     private static TodoManager todoManager = new TodoManager();
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd-HH-mm-ss");
 
     public static void main(String[] args) throws SQLException {
 
@@ -46,13 +50,15 @@ public class Main implements Command {
 
 
     private static void loginUser() throws SQLException {
-        System.out.println("Please input name,password");
-        String loginstr = scanner.nextLine();
-        String[] loginArr = loginstr.split(",");
-        currentUser = userManager.login(loginArr[0], loginArr[1]);
-        System.out.println("welcome" + currentUser.getName());
-        loginCommand();
-
+        System.out.println("Please input email,password");
+        String loginStr = scanner.nextLine();
+        String[] loginArr = loginStr.split(",");
+        User user = userManager.getByEmailAndPassword(loginArr[0], loginArr[1]);
+        if (user != null) {
+            currentUser = user;
+            System.out.println("welcome" + currentUser.getName());
+            loginCommand();
+        }
 
     }
 
@@ -72,26 +78,22 @@ public class Main implements Command {
                     isRun = false;
                     break;
                 case MY_IN_PROGRESS_LIST:
-                    todoManager.myInProgressList(Status.IN_PROGRESS, currentUser.getId());
+                    todoManager.myToDoList(ToDoStatus.IN_PROGRESS, currentUser.getId());
                     break;
                 case MY_FINISHED_LIST:
-                    todoManager.myInProgressList(Status.FINISHED, currentUser.getId());
+                    todoManager.myToDoList(ToDoStatus.FINISHED, currentUser.getId());
+                    break;
+                case MY_TODO_LIST:
+                    todoManager.myToDoList(ToDoStatus.TODO, currentUser.getId());
                     break;
                 case ADD_TODO:
                     addTodo();
                     break;
-                case CHANGE_TODO_STATUS:
-                    todoManager.printAllTodo(currentUser.getId());
-                    changeTodoStatus();
-                    break;
                 case DELETE_TODO_BY_ID:
-                    todoManager.printAllTodo(currentUser.getId());
-                    System.out.println("please input todo id");
-                    int todoIdForDelete = Integer.parseInt(scanner.nextLine());
-                    todoManager.deleteTodoBYid(todoIdForDelete);
+                    deleteTodoById();
                     break;
                 case MY_LIST:
-                    todoManager.printAllTodo(currentUser.getId());
+                    todoManager.getAllToDosByUser(currentUser.getId());
                     break;
                 case DELETE_USER:
                     userManager.deleteUserBYid(currentUser.getId());
@@ -102,54 +104,66 @@ public class Main implements Command {
         }
     }
 
-    @SneakyThrows
-    private static void changeTodoStatus() {
-        todoManager.printAllTodo(currentUser.getId());
-        System.out.println("please input todoId");
-        int todoId = Integer.parseInt(scanner.nextLine());
-        System.out.println("please input statusNumber");
-        System.out.println("FINISHED_LIST, TODO ,IN_PROGRESS");
-        Status status = Status.valueOf(scanner.nextLine().toUpperCase());
-        todoManager.changeTodoStatus(todoId, status);
+    private static void deleteTodoById() {
+        todoManager.getAllToDosByUser(currentUser.getId());
+        System.out.println("please input todo id");
+        long id = Long.parseLong(scanner.nextLine());
+        Todo byId = todoManager.getById(id);
+        if (byId.getUser().getId()==currentUser.getId()){
+            todoManager.deleteTodoBYid(id);
+        }else {
+            System.out.println("Wrong id");
+        }
     }
 
+
     private static void addTodo() {
+
+        System.out.println("please input todo title,deadline(yyy-MM-dd-HH-mm-ss");
+        String toDoDataStr = scanner.nextLine();
+        String[] split = toDoDataStr.split(",");
+        Todo todo = new Todo();
         try {
-            System.out.println("please input todo name");
-            String name = scanner.nextLine();
-            System.out.println("Status(TODO, FINISHED, IN_PROGRESS)");
-            Status status = Status.valueOf(scanner.nextLine().toUpperCase());
-            System.out.println("data date `dd.MM.yyyy");
-            String date = scanner.nextLine();
-            Todo todo = new Todo();
-            todo.setStatus(status);
-            todo.setDeadline(date);
-            todo.setName(name);
-            todoManager.addTodo(todo, currentUser.getId());
-            System.out.println("your todo added");
+            String title = split[0];
+            todo.setTitle(title);
+            try {
+                if (split[1] != null) {
+                    todo.setDeadline(sdf.parse(split[1]));
+                }
+            } catch (IndexOutOfBoundsException e) {
+
+            } catch (ParseException e) {
+                System.out.println("pleas input gate by this (yyyy-MM-dd-HH-mm-ss");
+            }
+            todo.setStatus(ToDoStatus.TODO);
+            todo.setUser(currentUser);
+            if (todoManager.create(todo)) {
+                System.out.println(" your todo added");
+            }
         } catch (IllegalArgumentException e) {
-            addTodo();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
     private static void registerUser() throws SQLException {
+        System.out.println(" please input User` name, surname, email,password");
+
         try {
-
-
-            System.out.println("please input User` name, surname, password,phoneNumber");
             String string = scanner.nextLine();
             String[] userDataArr = string.split(",");
-            User user = new User();
-            userManager.addUser(User.builder()
-                    .name(userDataArr[0])
-                    .surname(userDataArr[1])
-                    .password(userDataArr[2])
-                    .phoneNumber(userDataArr[3])
-                    .build()
-            );
-            System.out.println("User was successfully added");
+            User userFromStorage = userManager.getByEmail(userDataArr[2]);
+            if (userFromStorage == null) {
+                User user = new User();
+                userManager.register(User.builder()
+                        .name(userDataArr[0])
+                        .surname(userDataArr[1])
+                        .email(userDataArr[2])
+                        .password(userDataArr[3])
+                        .build()
+                );
+                System.out.println(" User was successfully added");
+            } else {
+                registerUser();
+            }
         } catch (ArrayIndexOutOfBoundsException e) {
             registerUser();
         }

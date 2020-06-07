@@ -8,8 +8,8 @@ public  class DBConnectionProvider {
 
     private static DBConnectionProvider instance = new DBConnectionProvider();
 
-    private final String DRIVER_NAME = "com.mysql.jdbc.Driver";
-    private final String DB_URL = "jdbc:mysql://localhost:3306/todo";
+    private final String DRIVER_NAME = "com.mysql.cj.jdbc.Driver";
+    private final String DB_URL = "jdbc:mysql://localhost:3306/todo1?useUnicode=true&characterEncoding=utf8&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
     private final String USERNAME = "root";
     private final String PASSWORD = "root";
 
@@ -20,6 +20,7 @@ public  class DBConnectionProvider {
             Class.forName(DRIVER_NAME);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+            System.exit(1);
         }
     }
 
@@ -34,6 +35,7 @@ public  class DBConnectionProvider {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            System.exit(1);
         }
         return connection;
     }
