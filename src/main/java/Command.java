@@ -9,10 +9,10 @@ public interface Command {
     int MY_IN_PROGRESS_LIST = 3;
     int MY_FINISHED_LIST = 4;
     int MY_TODO_LIST = 5;
-    int CHANGE_TODO_STATUS = 5;
     int DELETE_TODO_BY_ID = 6;
-
     int DELETE_USER = 7;
+    int CHANGE_TODO_STATUS =8;
+
 
     static void printCommand1() {
         System.out.println(EXIT + " FOR EXIT");

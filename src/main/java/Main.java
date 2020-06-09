@@ -1,24 +1,24 @@
 
-import manager.TodoManager;
+import manager.ToDoManager;
 import manager.UserManager;
 
 import model.ToDoStatus;
-import model.Todo;
+import model.ToDo;
 import model.User;
 
 
-import java.sql.Array;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Scanner;
+
+import static model.ToDoStatus.*;
 
 public class Main implements Command {
     private static User currentUser = null;
     private static Scanner scanner = new Scanner(System.in);
     private static UserManager userManager = new UserManager();
-    private static TodoManager todoManager = new TodoManager();
+    private static ToDoManager todoManager = new ToDoManager();
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd-HH-mm-ss");
 
     public static void main(String[] args) throws SQLException {
@@ -48,7 +48,6 @@ public class Main implements Command {
         }
     }
 
-
     private static void loginUser() throws SQLException {
         System.out.println("Please input email,password");
         String loginStr = scanner.nextLine();
@@ -59,7 +58,6 @@ public class Main implements Command {
             System.out.println("welcome" + currentUser.getName());
             loginCommand();
         }
-
     }
 
     private static void loginCommand() throws SQLException {
@@ -78,13 +76,13 @@ public class Main implements Command {
                     isRun = false;
                     break;
                 case MY_IN_PROGRESS_LIST:
-                    todoManager.myToDoList(ToDoStatus.IN_PROGRESS, currentUser.getId());
+                    todoManager.myToDoList(IN_PROGRESS, currentUser.getId());
                     break;
                 case MY_FINISHED_LIST:
-                    todoManager.myToDoList(ToDoStatus.FINISHED, currentUser.getId());
+                    todoManager.myToDoList(FINISHED, currentUser.getId());
                     break;
                 case MY_TODO_LIST:
-                    todoManager.myToDoList(ToDoStatus.TODO, currentUser.getId());
+                    todoManager.myToDoList(TODO, currentUser.getId());
                     break;
                 case ADD_TODO:
                     addTodo();
@@ -98,20 +96,38 @@ public class Main implements Command {
                 case DELETE_USER:
                     userManager.deleteUserBYid(currentUser.getId());
                     break;
+                case CHANGE_TODO_STATUS:
+                    forToDo();
+                    break;
                 default:
                     System.out.println("Wrong command!");
             }
         }
     }
 
+    private static void forToDo() {
+        try {
+            todoManager.getAllToDosByUser(currentUser.getId());
+            System.out.println("pleas input toDo id ,new toDo status");
+            String forNewToDoStr = scanner.nextLine();
+            String[] forNewToDoArr = forNewToDoStr.split(",");
+            long id = Long.parseLong(forNewToDoArr[0]);
+            ToDoStatus newToDo = valueOf(forNewToDoArr[1]);
+            todoManager.update(id, newToDo);
+        } catch (IllegalArgumentException e) {
+            forToDo();
+        }
+
+    }
+
     private static void deleteTodoById() {
         todoManager.getAllToDosByUser(currentUser.getId());
         System.out.println("please input todo id");
         long id = Long.parseLong(scanner.nextLine());
-        Todo byId = todoManager.getById(id);
-        if (byId.getUser().getId()==currentUser.getId()){
+        ToDo byId = todoManager.getById(id);
+        if (byId.getUser().getId() == currentUser.getId()) {
             todoManager.deleteTodoBYid(id);
-        }else {
+        } else {
             System.out.println("Wrong id");
         }
     }
@@ -119,10 +135,10 @@ public class Main implements Command {
 
     private static void addTodo() {
 
-        System.out.println("please input todo title,deadline(yyy-MM-dd-HH-mm-ss");
+        System.out.println("please input todo title,deadline(yyyy-MM-dd-HH-mm-ss)");
         String toDoDataStr = scanner.nextLine();
         String[] split = toDoDataStr.split(",");
-        Todo todo = new Todo();
+        ToDo todo = new ToDo();
         try {
             String title = split[0];
             todo.setTitle(title);
@@ -135,7 +151,7 @@ public class Main implements Command {
             } catch (ParseException e) {
                 System.out.println("pleas input gate by this (yyyy-MM-dd-HH-mm-ss");
             }
-            todo.setStatus(ToDoStatus.TODO);
+            todo.setStatus(TODO);
             todo.setUser(currentUser);
             if (todoManager.create(todo)) {
                 System.out.println(" your todo added");
@@ -152,7 +168,6 @@ public class Main implements Command {
             String[] userDataArr = string.split(",");
             User userFromStorage = userManager.getByEmail(userDataArr[2]);
             if (userFromStorage == null) {
-                User user = new User();
                 userManager.register(User.builder()
                         .name(userDataArr[0])
                         .surname(userDataArr[1])
@@ -168,5 +183,4 @@ public class Main implements Command {
             registerUser();
         }
     }
-
 }

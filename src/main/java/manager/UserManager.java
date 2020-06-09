@@ -21,9 +21,7 @@ public class UserManager {
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return getUserFromResultSet(resultSet);
-
             }
-
         } catch (
                 SQLException e) {
             e.printStackTrace();
@@ -35,7 +33,7 @@ public class UserManager {
     private User getUserFromResultSet(ResultSet resultSet) {
         try {
             return User.builder()
-                    .id(resultSet.getInt("id"))
+                    .id(resultSet.getLong("id"))
                     .name(resultSet.getString("name"))
                     .surname(resultSet.getString("surname"))
                     .password(resultSet.getString("password"))

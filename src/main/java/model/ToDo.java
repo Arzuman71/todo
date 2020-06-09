@@ -11,7 +11,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Todo {
+public class ToDo {
 
     private long id;
     private String title;
